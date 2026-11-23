@@ -5,6 +5,30 @@ void main() {
   runApp(const MyApp());
 }
 
+// Практична робота №5
+// Варіант №25
+
+// Параметри оформлення
+const double pixelSize = 25.0;
+const Color pixelColor = Colors.red;
+const Color borderColor = Colors.black;
+const double borderWidth = 4.0;
+const double cornerRadius = 5.0;
+
+// Матриця цифри 4
+// 1 - заповнений піксель
+// 0 - порожня клітинка
+const List<List<int>> digitFour = [
+  [1, 0, 0, 0, 1],
+  [1, 0, 0, 0, 1],
+  [1, 0, 0, 0, 1],
+  [1, 1, 1, 1, 1],
+  [0, 0, 0, 0, 1],
+  [0, 0, 0, 0, 1],
+  [0, 0, 0, 0, 1],
+];
+
+// Головний клас програми
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -12,256 +36,91 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Практична робота №10',
+      title: 'Практична робота №5',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.blue,
-        ),
         useMaterial3: true,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Colors.red,
+        ),
       ),
-      home: const HomeScreen(),
+      home: const MyHomePage(),
     );
   }
 }
 
-// Перший екран
-class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+// Головний екран
+class MyHomePage extends StatelessWidget {
+  const MyHomePage({super.key});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
-}
-
-class _HomeScreenState extends State<HomeScreen> {
-  final TextEditingController _textController =
-  TextEditingController();
-
-  final TextEditingController _sizeController =
-  TextEditingController(text: '32');
-
-  Future<void> _openPreview() async {
-    final text = _textController.text.trim();
-
-    final fontSize = double.tryParse(
-      _sizeController.text.trim().replaceAll(',', '.'),
-    );
-
-    if (text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Спочатку введіть текст'),
-        ),
-      );
-      return;
-    }
-
-    if (fontSize == null ||
-        !fontSize.isFinite ||
-        fontSize < 1 ||
-        fontSize > 200) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Введіть розмір від 1 до 200'),
-        ),
-      );
-      return;
-    }
-
-    // Відкриваємо другий екран і чекаємо результат
-    final result = await Navigator.push<bool>(
-      context,
-      MaterialPageRoute(
-        builder: (_) => PreviewScreen(
-          text: text,
-          fontSize: fontSize,
-        ),
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.red.shade100,
+        title: const Text('Практична робота №5'),
+        centerTitle: true,
       ),
-    );
-
-    if (!context.mounted) return;
-
-    // Визначаємо повідомлення залежно від результату
-    final message = switch (result) {
-      true => 'Cool!',
-      false => 'Let’s try something else',
-      null => "Don't know what to say",
-    };
-
-    // Показуємо діалогове вікно
-    await showDialog<void>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text('Результат'),
-        content: Text(message),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(dialogContext);
-            },
-            child: const Text('Закрити'),
+      body: Column(
+        children: [
+          Expanded(
+            child: SafeArea(
+              child: Center(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: digitFour.map((row) {
+                      return Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: row.map((cell) {
+                          return PixelDot(
+                            filled: cell == 1,
+                          );
+                        }).toList(),
+                      );
+                    }).toList(),
+                  ),
+                ),
+              ),
+            ),
           ),
         ],
       ),
     );
   }
-
-  @override
-  void dispose() {
-    _textController.dispose();
-    _sizeController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Практична робота №10'),
-        backgroundColor: Colors.blue.shade100,
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const Icon(
-                Icons.text_fields,
-                size: 75,
-                color: Colors.blue,
-              ),
-              const SizedBox(height: 20),
-
-              const Text(
-                'Налаштування тексту',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-
-              const SizedBox(height: 30),
-
-              TextField(
-                controller: _textController,
-                maxLines: 3,
-                decoration: const InputDecoration(
-                  labelText: 'Введіть текст',
-                  hintText: 'Наприклад: Привіт, Flutter!',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.edit),
-                ),
-              ),
-
-              const SizedBox(height: 20),
-
-              TextField(
-                controller: _sizeController,
-                keyboardType: const TextInputType.numberWithOptions(
-                  decimal: true,
-                ),
-                decoration: const InputDecoration(
-                  labelText: 'Розмір шрифту',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.format_size),
-                ),
-              ),
-
-              const SizedBox(height: 30),
-
-              ElevatedButton.icon(
-                onPressed: _openPreview,
-                icon: const Icon(Icons.preview),
-                label: const Text('Переглянути'),
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.all(16),
-                  textStyle: const TextStyle(fontSize: 18),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
 }
 
-// Другий екран
-class PreviewScreen extends StatelessWidget {
-  final String text;
-  final double fontSize;
+// Власний віджет PixelDot
+class PixelDot extends StatelessWidget {
+  final bool filled;
 
-  const PreviewScreen({
+  const PixelDot({
     super.key,
-    required this.text,
-    required this.fontSize,
+    required this.filled,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Попередній перегляд'),
-        backgroundColor: Colors.blue.shade100,
-      ),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            children: [
-              const Text(
-                'Ваш текст:',
-                style: TextStyle(fontSize: 18),
-              ),
+    // Якщо клітинка порожня
+    if (!filled) {
+      return const SizedBox(
+        width: pixelSize,
+        height: pixelSize,
+      );
+    }
 
-              const SizedBox(height: 20),
-
-              Expanded(
-                child: Center(
-                  child: SingleChildScrollView(
-                    child: Text(
-                      text,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: fontSize,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.blue.shade800,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 15),
-
-              Row(
-                children: [
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () {
-                        Navigator.pop(context, true);
-                      },
-                      child: const Text('Ok'),
-                    ),
-                  ),
-
-                  const SizedBox(width: 15),
-
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: () {
-                        Navigator.pop(context, false);
-                      },
-                      child: const Text('Cancel'),
-                    ),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 20),
-            ],
-          ),
+    // Якщо клітинка заповнена
+    return Container(
+      width: pixelSize,
+      height: pixelSize,
+      decoration: BoxDecoration(
+        color: pixelColor,
+        border: Border.all(
+          color: borderColor,
+          width: borderWidth,
+        ),
+        borderRadius: BorderRadius.circular(
+          cornerRadius,
         ),
       ),
     );
